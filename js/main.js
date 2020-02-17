@@ -4,7 +4,6 @@ var ADS_QUANTITY = 8;
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 
-var ads = [];
 var OFFER_TITLES = ['Заголовок предложения 1', 'Заголовок предложения 2', 'Заголовок предложения 3', 'Заголовок предложения 4', 'Заголовок предложения 5', 'Заголовок предложения 6', 'Заголовок предложения 7', 'Заголовок предложения 8'];
 var OFFER_ADDRESES = ['200, 130', '300, 185', '400, 250', '500, 350', '600, 450', '700, 350', '800, 250'];
 var OFFER_PRICES = ['1500', '200', '2700', '800', '999', '8900', '1000', '9999'];
@@ -30,8 +29,10 @@ var getRandomValue = function (data) {
   return data[randomIndex];
 };
 
-var generateAds = function () {
-  for (var i = 0; i < ADS_QUANTITY; i++) {
+var generateAds = function (quantity) {
+  var ads = [];
+
+  for (var i = 0; i < quantity; i++) {
     var ad = {
       'author': {
         'avatar': 'img/avatars/user0' + [i + 1] + '.png'
@@ -61,12 +62,10 @@ var generateAds = function () {
   return ads;
 };
 
-generateAds();
-
 var renderPin = function (ad) {
   var pinElement = pinTemplate.cloneNode(true);
 
-  pinElement.style.left = ad.location.x - PIN_WIDTH + 'px';
+  pinElement.style.left = ad.location.x - PIN_WIDTH / 2 + 'px';
   pinElement.style.top = ad.location.y - PIN_HEIGHT + 'px';
   pinElement.querySelector('img').src = ad.author.avatar;
   pinElement.querySelector('img').alt = ad.offer.title;
@@ -74,11 +73,15 @@ var renderPin = function (ad) {
   return pinElement;
 };
 
-var fragment = document.createDocumentFragment();
+var insertPins = function (ads) {
+  var fragment = document.createDocumentFragment();
 
-for (var i = 0; i < ads.length; i++) {
-  var pinItem = renderPin(ads[i]);
-  fragment.appendChild(pinItem);
-}
+  for (var j = 0; j < ads.length; j++) {
+    var pinItem = renderPin(ads[j]);
+    fragment.appendChild(pinItem);
+  }
 
-pinList.appendChild(fragment);
+  return fragment;
+};
+
+pinList.append(insertPins(generateAds(ADS_QUANTITY)));
