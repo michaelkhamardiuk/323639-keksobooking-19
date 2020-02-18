@@ -67,12 +67,10 @@ var generateAds = function (quantity) {
 var renderAdPhotos = function (photos) {
   photosBlock.innerHTML = '';
 
-  // for (var i = 0; i < photos.length; i++) {
-  //   photosContainer.insertAdjacentHTML('afterend', '<img src="' + [i] + '" class="popup__photo" width="45" height="40" alt="Фотография жилья">');
-  // }
-
-
-}
+  for (var i = 0; i < photos.length; i++) {
+    photosBlock.insertAdjacentHTML('afterend', '<img src="' + [i] + '" class="popup__photo" width="45" height="40" alt="Фотография жилья">');
+  }
+};
 
 var renderPin = function (ad) {
   var pinElement = pinTemplate.cloneNode(true);
