@@ -7,7 +7,12 @@ var PIN_HEIGHT = 70;
 var OFFER_TITLES = ['Заголовок предложения 1', 'Заголовок предложения 2', 'Заголовок предложения 3', 'Заголовок предложения 4', 'Заголовок предложения 5', 'Заголовок предложения 6', 'Заголовок предложения 7', 'Заголовок предложения 8'];
 var OFFER_ADDRESES = ['200, 130', '300, 185', '400, 250', '500, 350', '600, 450', '700, 350', '800, 250'];
 var OFFER_PRICES = ['1500', '200', '2700', '800', '999', '8900', '1000', '9999'];
-var OFFER_TYPES = ['palace', 'flat', 'house', 'bungalo'];
+var OFFER_TYPES_LIST_MAP = {
+  'flat': 'Квартира',
+  'bungalo': 'Бунгало',
+  'house': 'Дом',
+  'palace': 'Дворец'
+};
 var OFFER_ROOMS = ['1', '2', '3', '4'];
 var OFFER_GUESTS = ['1', '2', '3', '4', '5', '6', '7', '8'];
 var OFFER_CHECKINS = ['12:00', '13:00', '14:00'];
@@ -24,13 +29,21 @@ map.classList.remove('map--faded');
 var pinList = document.querySelector('.map__pins');
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var adTemplate = document.querySelector('#card').content.querySelector('.map__card');
-var photosBlock = adTemplate.querySelector('.popup__photos');
+adTemplate.querySelector('.popup__photos').innerHTML = '';
 
-var getRandomValue = function (data) {
+/* Функция выбора рандомного значения из массива */
+var getArrayRandomValue = function (data) {
   var randomIndex = Math.floor(Math.random() * data.length);
   return data[randomIndex];
 };
 
+/* Функция выбора рандомного значения из объекта */
+var getObjectRandomValue = function (obj) {
+  var keys = Object.keys(obj);
+  return obj[keys[keys.length * Math.random() << 0]];
+};
+
+/* Функция генерирующая объект объявления */
 var generateAds = function (quantity) {
   var ads = [];
 
@@ -40,21 +53,21 @@ var generateAds = function (quantity) {
         'avatar': 'img/avatars/user0' + [i + 1] + '.png'
       },
       'offer': {
-        'title': getRandomValue(OFFER_TITLES),
-        'address': getRandomValue(OFFER_ADDRESES),
-        'price': getRandomValue(OFFER_PRICES),
-        'type': getRandomValue(OFFER_TYPES),
-        'rooms': getRandomValue(OFFER_ROOMS),
-        'guests': getRandomValue(OFFER_GUESTS),
-        'checkin': getRandomValue(OFFER_CHECKINS),
-        'checkout': getRandomValue(OFFER_CHECKOUTS),
-        'features': getRandomValue(OFFER_FEUTURES),
-        'description': getRandomValue(OFFER_DESCRIPTIONS),
-        'photos': getRandomValue(OFFER_PHOTOS)
+        'title': getArrayRandomValue(OFFER_TITLES),
+        'address': getArrayRandomValue(OFFER_ADDRESES),
+        'price': getArrayRandomValue(OFFER_PRICES),
+        'type': getObjectRandomValue(OFFER_TYPES_LIST_MAP),
+        'rooms': getArrayRandomValue(OFFER_ROOMS),
+        'guests': getArrayRandomValue(OFFER_GUESTS),
+        'checkin': getArrayRandomValue(OFFER_CHECKINS),
+        'checkout': getArrayRandomValue(OFFER_CHECKOUTS),
+        'features': getArrayRandomValue(OFFER_FEUTURES),
+        'description': getArrayRandomValue(OFFER_DESCRIPTIONS),
+        'photos': getArrayRandomValue(OFFER_PHOTOS)
       },
       'location': {
-        'x': getRandomValue(OFFER_LOCATION_X),
-        'y': getRandomValue(OFFER_LOCATION_Y)
+        'x': getArrayRandomValue(OFFER_LOCATION_X),
+        'y': getArrayRandomValue(OFFER_LOCATION_Y)
       }
     };
 
@@ -64,14 +77,19 @@ var generateAds = function (quantity) {
   return ads;
 };
 
+/* Функция вывода фотографий в объявлении */
 var renderAdPhotos = function (photos) {
-  photosBlock.innerHTML = '';
+  var fragment = document.createDocumentFragment();
 
   for (var i = 0; i < photos.length; i++) {
-    photosBlock.insertAdjacentHTML('afterend', '<img src="' + [i] + '" class="popup__photo" width="45" height="40" alt="Фотография жилья">');
+    var newImg = document.createRange().createContextualFragment('<img src="' + photos[i] + '" class="popup__photo" width="45" height="40" alt="Фотография жилья">');
+    fragment.append(newImg);
   }
+
+  return fragment;
 };
 
+/* Функция генерации метки объявления из темплейта */
 var renderPin = function (ad) {
   var pinElement = pinTemplate.cloneNode(true);
 
@@ -83,6 +101,7 @@ var renderPin = function (ad) {
   return pinElement;
 };
 
+/* Функиця генерирующая отдельное объявление из темплейта на основании объекта */
 var renderAd = function (ad) {
   var adElement = adTemplate.cloneNode(true);
 
@@ -95,11 +114,12 @@ var renderAd = function (ad) {
   adElement.querySelector('.popup__text--time').textContent = 'Заезд после ' + ad.offer.checkin + ', выезд до ' + ad.offer.checkout;
   adElement.querySelector('.popup__features').textContent = ad.offer.features;
   adElement.querySelector('.popup__description').textContent = ad.offer.description;
-  renderAdPhotos(ad.photos);
+  adElement.querySelector('.popup__photos').append(renderAdPhotos(ad.offer.photos));
 
   return adElement;
 };
 
+/* Функция вставки метки объявления на карту */
 var insertPins = function (ads) {
   var fragment = document.createDocumentFragment();
 
@@ -111,6 +131,7 @@ var insertPins = function (ads) {
   return fragment;
 };
 
+/* Функция вставки объявлений на карту */
 var insertAds = function (ads) {
   var fragment = document.createDocumentFragment();
 
@@ -122,6 +143,8 @@ var insertAds = function (ads) {
   return fragment;
 };
 
+/* Добавляем метки на карту */
 pinList.append(insertPins(generateAds(ADS_QUANTITY)));
 
+/* Добавляем объявление на карту */
 map.querySelector('.map__filters-container').before(insertAds(generateAds(ADS_QUANTITY)));
